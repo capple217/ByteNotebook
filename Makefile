@@ -3,17 +3,31 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -O2
 
 # Target name
-TARGET = tester
+TARGET = ByteNotebook
 
 # Source files
-SRC = tester.cpp
+SRCS = main.cpp chunk.cpp memory.cpp
 
-# Build target
+# Object files (correct extension)
+OBJS = $(SRCS:.cpp=.o)
+
+# Header dependencies (for clarity, not used directly unless you set up dependencies)
+HDRS = common.h chunk.h memory.h
+
+# Default target
 all: $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC)
+# Link the object files into the final binary
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS)
 
-# Clean up compiled files
+# Rule to compile .cpp to .o
+%.o: %.cpp $(HDRS)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Clean target
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(OBJS)
+
+.PHONY: all clean
+
