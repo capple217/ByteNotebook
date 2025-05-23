@@ -12,7 +12,7 @@ SRCS = main.cpp chunk.cpp debug.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Header dependencies (for clarity, not used directly unless we set up dependencies)
-HDRS = common.h chunk.h memory.h debug.h
+HDRS = common.h chunk.h debug.h
 
 # Default target
 all: $(TARGET)

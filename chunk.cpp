@@ -12,3 +12,8 @@ void Chunk::writeChunk(uint8_t byte) {
 void Chunk::freeChunk() {
   code.clear();
 }
+
+int Chunk::addConstant(Value value) {
+  constants.writeValueArray(value);
+  return constants.size() - 1;
+}
