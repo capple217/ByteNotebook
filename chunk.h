@@ -30,7 +30,7 @@ struct Chunk {
   int addConstant(Value value);     // Returns the idx to the newest / last value in array
 
   int writeConstant(Value value, int line);     // Factors in writing constant with more numbers ()
-;;
+};
 
 
 #endif
