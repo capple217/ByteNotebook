@@ -2,6 +2,7 @@
 #include "common.h"
 #include "value.h"
 #include "debug.h"
+#include "compiler.h"
 
 #include <iostream>
 #include <vector>
@@ -96,8 +97,7 @@ static InterpretResult run() {                    // Main function the VM will b
 #undef BINARY_OP
 }
 
-InterpretResult interpret(Chunk* chunk) {
-  vm.chunk = chunk;
-  vm.ip = vm.chunk->code.data();                    // We use this since the underlying structure within code is a vector<uint8_t>
-  return run();
+InterpretResult interpret(const std::string source) {
+  compile(source);
+  return INTERPRET_OK;
 }

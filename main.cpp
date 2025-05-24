@@ -1,41 +1,60 @@
-#include <iostream>
-
 #include "common.h"
 #include "chunk.h"
 #include "debug.h"
 #include "vm.h"
 
+#include <iostream>
+#include <fstream>
+#include <stdlib>
+#include <string>
+#include <sstream>
+
+static void repl() {
+  std::string line;
+  while (true) {
+    std::cout << "> ";
+
+    if (!std::getline(std::cin, line)) {
+      std::cout << std::endl;
+      break;
+    }
+
+    interpret(line);
+  }
+}
+
+static void runFile(const std::string& path) {
+  std::ifstream file(path);
+  if (!file.is_open()) {
+    std::cerr << "Could not open file: " << path << std::endl;
+    std::exit(74);
+  }
+
+  std::stringstream buffer;
+  buffer << file.rdbuf();
+  std::string source = buffer.str();
+
+  InterpretResult result = interpret(source.c_str());
+
+  if (result == INTERPRET_COMPILE_ERROR) std::exit(65);
+  if (result == INTERPRET_RUNTIME_ERROR) std::exit(70);
+}                       // Theoretically, we shouldn't have issues with memory to read data since we're using std::string instead of arrays
 
 int main(int argc, const char* argv[]) {
 
   initVM();           // Might just have an instantiation of the struct instead: VM vm
   
-  Chunk chunk;
+  if (argc == 1) {
+    repl();
+  }
+  else if (argc == 2) {
+  runFile(argv[1]);
+  }
+  else {
+    std::cerr << "Usage: VM [path]\n";
+    std::exit(64);
+  }
 
-  int constant = chunk.addConstant(1.2);
-  chunk.writeChunk(OP_CONSTANT, 123);
-  chunk.writeChunk(constant, 123);
-
-  constant = chunk.addConstant(3.4);
-  chunk.writeChunk(OP_CONSTANT, 123);
-  chunk.writeChunk(constant, 123);
-
-  chunk.writeChunk(OP_ADD, 123);
-
-  constant = chunk.addConstant(5.6);
-  chunk.writeChunk(OP_CONSTANT, 123);
-  chunk.writeChunk(constant, 123);
-
-  chunk.writeChunk(OP_DIVIDE, 123);
-  chunk.writeChunk(OP_NEGATE, 123);
-  chunk.writeChunk(OP_RETURN, 123);
-
-  disassembleChunk(chunk, "test chunk");
-
-  interpret(&chunk);
   freeVM();
-  chunk.freeChunk();
-
   return 0;
-
 }

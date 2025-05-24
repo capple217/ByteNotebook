@@ -22,7 +22,7 @@ enum InterpretResult {
   INTERPRET_RUNTIME_ERROR,
 };
 
-  InterpretResult interpret(Chunk* chunk);
+  InterpretResult interpret(const std::string source);
 
   void push(Value value);
 
