@@ -14,12 +14,13 @@ enum OpCode {
 struct Chunk {
   // Variables
   std::vector<uint8_t> code;      // Instead of using the raw pointer uint8_t* from the C version, we can be more secure and simpler using a vector
+  std::vector<int> lines;         // Line number to track where each line of code is (especially important when debugging code)
   ValueArray constants;
   
   // Functions 
   Chunk();                        // Default Constructor
 
-  void writeChunk(uint8_t byte);    // appends to the back of the vector
+  void writeChunk(uint8_t byte, int line);    // appends to the back of the vector
 
   void freeChunk();                 // Empties the vector
 

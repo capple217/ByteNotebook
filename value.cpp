@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <cstdlib>
+#include <iostream>
 
 ValueArray::ValueArray() {}   // Default
 
@@ -13,3 +14,6 @@ void ValueArray::freeValueArray() {
   values.clear();
 }
 
+void printValue(Value value) {
+  std::cout << value;
+}

@@ -6,13 +6,13 @@ CXXFLAGS = -std=c++17 -Wall -Wextra -O2
 TARGET = ByteNotebook
 
 # Source files
-SRCS = main.cpp chunk.cpp debug.cpp
+SRCS = main.cpp chunk.cpp debug.cpp value.cpp 
 
 # Object files 
 OBJS = $(SRCS:.cpp=.o)
 
 # Header dependencies (for clarity, not used directly unless we set up dependencies)
-HDRS = common.h chunk.h debug.h
+HDRS = common.h chunk.h debug.h value.h
 
 # Default target
 all: $(TARGET)

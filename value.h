@@ -1,5 +1,5 @@
 #ifndef value_h
-#define #value_h
+#define value_h
 
 #include "common.h"
 
@@ -15,5 +15,7 @@ struct ValueArray {                 // Same shtick as chunk, we use vectors inst
   void freeValueArray();             // clear() 
 
 };
+
+  void printValue(Value value);
 
 #endif

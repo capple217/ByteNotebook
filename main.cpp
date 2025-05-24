@@ -8,7 +8,12 @@
 int main(int argc, const char* argv[]) {
   
   Chunk chunk;
-  chunk.writeChunk(OP_RETURN);
+
+  int constant = chunk.addConstant(1.2);
+  chunk.writeChunk(OP_CONSTANT, 123);
+  chunk.writeChunk(constant, 123);
+
+  chunk.writeChunk(OP_RETURN, 123);
 
   disassembleChunk(chunk, "test chunk");
 
