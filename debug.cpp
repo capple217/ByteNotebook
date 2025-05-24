@@ -46,6 +46,17 @@ int disassembleChunk(Chunk& chunk, int offset) {
     case OP_CONSTANT:
       return constantInstruction("OP_CONSTANT", chunk, offset);
 
+    case OP_CONSTANT_LONG: // Instead of function use here, we're cluttering and filling here; prolly to be changed later;
+      int byte1 = chunk.code[offset + 1];
+      int byte2 = chunk.code[offset + 2];
+      int byte3 = chunk.code[offset + 3];
+      int constant = (byte1 << 16) | (byte2 << 8) | byte3;
+
+      std::cout << std::left << std::setw(16) << "OP_CONSTANT_LONG" << std::right << std::setw(4) << constant << " '";
+      printValue(chunk.constants[constant]);            // TODO Might have to change and fix this
+      std::cout << "'" << std::endl;
+      return offset + 4;
+
     case OP_RETURN:
       return simpleInstruction("OP_RETURN", offset);
 

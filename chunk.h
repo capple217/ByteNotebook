@@ -8,6 +8,7 @@
 
 enum OpCode {
   OP_CONSTANT,
+  OP_CONSTANT_LONG,                       // Challenge code from Chapter 14 
   OP_RETURN,        // Return from current function
 };
 
@@ -27,7 +28,9 @@ struct Chunk {
   // Functions w ValueArray
   
   int addConstant(Value value);     // Returns the idx to the newest / last value in array
-};
+
+  int writeConstant(Value value, int line);     // Factors in writing constant with more numbers ()
+;;
 
 
 #endif

@@ -18,3 +18,18 @@ int Chunk::addConstant(Value value) {
   constants.writeValueArray(value);
   return constants.values.size() - 1;
 }
+
+int writeConstant(Value value, int line) {
+  int idx = addConstant(value);
+  
+  if (idx <= UINT8_MAX) {
+    writeChunk(OP_CONSTANT, line);
+    writeChunk(static_cast<uint8_t>(idx), line);
+  }
+  else {
+    writeChunk(OP_CONSTANT_LONG, line);
+    writeChunk((index >> 16) & 0xFF, line);
+    writeChunk((index >> 8) & 0xFF, line);
+    writeChunk(index & 0xFF, line);
+  }
+}
