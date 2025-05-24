@@ -9,7 +9,7 @@ void disassembleChunk(Chunk& chunk, const char* name) {
   std::cout << "== " << name << " ==" << std::endl;
 
   for (size_t offset = 0; offset < chunk.code.size();) {
-    offset = disassembleChunk(chunk, offset);
+    offset = disassembleInstruction(chunk, offset);
   }
 }
 
@@ -28,7 +28,7 @@ static int constantInstruction(const char* name, Chunk& chunk, int offset) {
   return offset + 2;
 }
 
-int disassembleChunk(Chunk& chunk, int offset) {
+int disassembleInstruction(Chunk& chunk, int offset) {
   std::cout << std::setfill('0')  << std::setw(4) << offset << std::setfill(' ') <<  " ";
 
   // line info
@@ -58,6 +58,21 @@ int disassembleChunk(Chunk& chunk, int offset) {
       std::cout << "'" << std::endl;
       return offset + 4;
       }
+
+    case OP_ADD:
+      return simpleInstruction("OP_ADD", offset);
+
+    case OP_SUBTRACT:
+      return simpleInstruction("OP_SUBTRACT", offset);
+
+    case OP_MULTIPLY:
+      return simpleInstruction("OP_MULTIPLY", offset);
+
+    case OP_DIVIDE:
+      return simpleInstruction("OP_DIVIDE", offset);
+
+    case OP_NEGATE:
+      return simpleInstruction("OP_NEGATE", offset);
 
     case OP_RETURN:
       return simpleInstruction("OP_RETURN", offset);

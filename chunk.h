@@ -8,6 +8,11 @@
 
 enum OpCode {
   OP_CONSTANT,
+  OP_ADD,
+  OP_SUBTRACT,
+  OP_MULTIPLY,
+  OP_DIVIDE,
+  OP_NEGATE,
   OP_CONSTANT_LONG,                       // Challenge code from Chapter 14 
   OP_RETURN,        // Return from current function
 };
