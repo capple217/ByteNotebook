@@ -18,6 +18,10 @@ void initScanner(const std::string& source) {
   scanner.line = 1;
 }
 
+static bool isDigit(char c) {
+  return c >= '0' && c <= '9';
+}
+
 static bool isAtEnd() {
   return *scanner.current == '\0';
 }
@@ -25,6 +29,15 @@ static bool isAtEnd() {
 static char advance() {
   scanner.current++;
   return scanner.current[-1];               // Unfamiliar with this syntax might have to come back here and fix
+}
+
+static char peek() {
+  return *scanner.current;
+}
+
+static char peekNext() {
+  if (isAtEnd()) return '\0';
+  return scanner.current[1];
 }
 
 static bool match(char expected) {
@@ -52,12 +65,67 @@ static Token errorToken(const std::string& message) {
   return token;
 }
 
+static void skipWhitespace() {
+  while (true) {
+    char c = peek();
+    switch (c) {
+      case ' ':
+      case '\r':
+      case '\t':
+        advance();
+        break;
+      case '\n':
+        scanner.line++;
+        advance();
+        break;
+      case '/':
+        if (peekNext == '/') {
+          while (peek() != '\n' && !isAtEnd()) advance();
+        }
+        else {
+          return;
+        }
+        break;
+      default:
+        return;
+    }
+  }
+}
+
+static Token number() {
+  while (isDigit(peek())) advance();
+
+  // look for a fractional part
+  if (peek() == '.' && isDigit(peekNext())) {
+    advance();
+
+    while (isDigit(peek())) advance();
+  }
+
+  return makeToken(TOKEN_NUMBER);
+}
+
+static Token string() {
+  while (peek() != '"' && !isAtEnd()) {
+    if (peek == '\n') scanner.line++;
+    advance();
+  }
+
+  if (isAtEnd()) return errorToken("Unterminated string.");
+
+  // Closing quote
+  advance();
+  return makeToken(TOKEN_STRING);
+}
+
 Token scanToken() {                             // Here is where we scan over each "lexeme" and turn it into tokens for our compiler to understand
+  skipWhitespace();                             // First skip over any white space before reading actual lexemes and characters
   scanner.start = scanner.current;
 
   if (isAtEnd()) return makeToken(TOKEN_EOF);
 
   char c = advance();
+  if (isDigit(c)) return number();
 
   switch (c) {
     case '(': return makeToken(TOKEN_LEFT_PAREN);
@@ -83,6 +151,7 @@ Token scanToken() {                             // Here is where we scan over ea
     case '>':
       return makeToken(
           match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
+    case '"': retirm string();
   }
 
   return errorToken("Unexpected character.");
