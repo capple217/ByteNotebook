@@ -5,20 +5,9 @@
 #include <string>
 #include <iostream>
 
-void compile(const std::string source) {
+bool compile(const std::string source, Chunk* chunk) {
   initScanner(source);
-  int line = -1;
-  while (true) {
-    Token token = scanToken();
-    if (token.line != line) {
-      std::cout << std::setw(4) << token.line << " ";
-      line = token.line;
-    }
-    else {
-      std::cout << "   | ";
-    }
-    std::cout << std::setw(2) << token.type << " '" << std::string(token.start, token.length) << "'\n";
-
-    if (token.type == TOKEN_EOF) break;
-  }
+  advance();
+  expression();
+  consume(TOKEN_EOF, "Expect end of expresssion.");
 }

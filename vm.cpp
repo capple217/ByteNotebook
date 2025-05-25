@@ -98,6 +98,18 @@ static InterpretResult run() {                    // Main function the VM will b
 }
 
 InterpretResult interpret(const std::string source) {
-  compile(source);
-  return INTERPRET_OK;
+  Chunk chunk;
+
+  if (!compile(source, &chunk)) {
+    chunk.freeChunk();
+    return INTERPRET_COMPILE_ERROR;
+  }
+
+  vm.chunk = &chunk;
+  vm.ip = vm.chunk->code.data();
+
+  InterpretResult result = run();
+
+  chunk.freeChunk();
+  return result;
 }

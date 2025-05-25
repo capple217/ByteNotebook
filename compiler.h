@@ -1,8 +1,10 @@
 #ifndef compiler_h
 #define compiler_h
 
+#include "vm.h"
+
 #include <string>
 
-void compile(const std::string source);
+bool compile(const std::string source, Chunk* chunk);
 
 #endif
