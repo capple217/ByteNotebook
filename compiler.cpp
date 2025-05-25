@@ -5,12 +5,28 @@
 #include <string>
 #include <iostream>
 #include <cstdlib>
+#include <limits>
+#include <cstdint>
 
 struct Parser {
   Token current;
   Token previous;
   bool hadError;
   bool panicMode;
+};
+
+enum Precedence {
+  PREC_NONE,
+  PREC_ASSIGNMENT,  // =
+  PREC_OR,          // or
+  PREC_AND,         // and
+  PREC_EQUALITY,    // == !=
+  PREC_COMPARISON,  // < > <= >=
+  PREC_TERM,        // + -
+  PREC_FACTOR,      // * /
+  PREC_UNARY,       // ! -
+  PREC_CALL,        // . ()
+  PREC_PRIMARY,
 };
 
 Parser parser;
@@ -80,8 +96,54 @@ static void emitReturn() {
   emitByte(OP_RETURN);
 }
 
+static uint8_t makeConstant(Value value) {
+  int constant = addConstant(currentChunk(), value);
+  if (constant > UINT8_MAX) {
+    error("Too many constants in one chunk.");
+    return 0;
+  }
+
+  return static_cast<uint8_t>(constant);
+}
+
+static void emitConstant(Value value) {
+  emitBytes(OP_CONSTANT, makeConstant(value));
+}
+
 static void endCompiler() {
   emitReturn();
+}
+
+staic void grouping() {
+  expression();
+  consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+}
+
+static void number() {
+  std::string lexeme(parser.previous.start, parser.previos.length);
+  double value = std::strtod(lexeme.c_str(), nullptr);
+  emitConstant(value);
+}
+
+static void unary() {
+  TokenType operatorType = parser.previous.type;
+
+  // compile the operand
+  parsePrecedence(PREC_UNARY);
+
+  // emit the operator instruction
+  switch (operatorType) {
+    case TOKEN_MINUS: emitByte(OP_NEGATE); break;
+    default: return; // unreachable
+  }
+}
+
+static void parsePrecedence(Precedence precedence) {
+  // to be worked on;
+}
+
+static void expression() {
+  parsePrecedence(PREC_ASSIGNMENT);
 }
 
 bool compile(const std::string source, Chunk* chunk) {
