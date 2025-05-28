@@ -8,19 +8,19 @@ struct Scanner {
   const char* start;
   const char* current;
   int line;
-}
+};
 
 Scanner scanner;
 
 void initScanner(const std::string& source) {
-  scanner.start = &source;
-  scanner.current = &source;
+  scanner.start = source.c_str();
+  scanner.current = source.c_str();
   scanner.line = 1;
 }
 
 static bool isAlpha(char c) {
-  return (c >= 'a' && c <= 'z' ||
-          c >= 'A' && c <= 'Z' ||
+  return ((c >= 'a' && c <= 'z') ||
+          (c >= 'A' && c <= 'Z') ||
           c == '_');
 }
 
@@ -65,8 +65,8 @@ static Token makeToken(TokenType type) {
 static Token errorToken(const std::string& message) {
   Token token;
   token.type = TOKEN_ERROR;
-  token.start = &message;
-  token.length = message.size();
+  token.start = message.c_str();
+  token.length = static_cast<int>(message.length());
   token.line = scanner.line;
   return token;
 }
@@ -85,7 +85,7 @@ static void skipWhitespace() {
         advance();
         break;
       case '/':
-        if (peekNext == '/') {
+        if (peekNext() == '/') {
           while (peek() != '\n' && !isAtEnd()) advance();
         }
         else {
@@ -161,7 +161,7 @@ static Token number() {
 
 static Token string() {
   while (peek() != '"' && !isAtEnd()) {
-    if (peek == '\n') scanner.line++;
+    if (peek() == '\n') scanner.line++;
     advance();
   }
 
@@ -206,7 +206,7 @@ Token scanToken() {                             // Here is where we scan over ea
     case '>':
       return makeToken(
           match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
-    case '"': retirm string();
+    case '"': return string();
   }
 
   return errorToken("Unexpected character.");

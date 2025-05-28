@@ -1,6 +1,7 @@
 #include "compiler.h"
 #include "common.h"
 #include "scanner.h"
+#include "chunk.h"
 
 #ifdef DEBUG_PRINT_CODE
 #include "debug.h"
@@ -49,9 +50,9 @@ static Chunk* currentChunk() {
   return compilingChunk;
 }
 
-static void ErrorAt(Token* token, const std::string& message) {
+static void errorAt(Token* token, const std::string& message) {
   if (parser.panicMode) return;
-  parser.panicMode = true
+  parser.panicMode = true;
   std::cerr << "[line " << token->line << "] Error";
 
   if (token->type == TOKEN_EOF) {
@@ -68,7 +69,7 @@ static void ErrorAt(Token* token, const std::string& message) {
   parser.hadError = true;
 }
 
-static void error(const std::string& messsage) {
+static void error(const std::string& message) {
   errorAt(&parser.previous, message);
 }
 
@@ -80,8 +81,8 @@ static void advance() {
   parser.previous = parser.current;
 
   while (true) {
-    parset.current = scanToken();
-    if (parset.current.type != TOKEN_ERROR) break;
+    parser.current = scanToken();
+    if (parser.current.type != TOKEN_ERROR) break;
 
     errorAtCurrent(parser.current.start);
   }
@@ -110,7 +111,7 @@ static void emitReturn() {
 }
 
 static uint8_t makeConstant(Value value) {
-  int constant = addConstant(currentChunk(), value);
+  int constant = (*currentChunk()).addConstant(value);
   if (constant > UINT8_MAX) {
     error("Too many constants in one chunk.");
     return 0;
@@ -127,7 +128,7 @@ static void endCompiler() {
   emitReturn();
 #ifdef DEBUG_PRINT_CODE
   if (!parser.hadError) {
-    disassembleChunk(currentChunk(), "code");
+    disassembleChunk(*currentChunk(), "code");
   }
 #endif
 }
@@ -150,13 +151,13 @@ static void binary() {
   }
 }
 
-staic void grouping() {
+static void grouping() {
   expression();
   consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 }
 
 static void number() {
-  std::string lexeme(parser.previous.start, parser.previos.length);
+  std::string lexeme(parser.previous.start, parser.previous.length);
   double value = std::strtod(lexeme.c_str(), nullptr);
   emitConstant(value);
 }

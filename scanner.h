@@ -35,7 +35,7 @@ struct Token {
   int line;
 };
 
-void initScanner(const std::string source);
+void initScanner(const std::string& source);
 Token scanToken();
 
 #endif

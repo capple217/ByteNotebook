@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <stdlib>
+#include <cstdlib>
 #include <string>
 #include <sstream>
 
