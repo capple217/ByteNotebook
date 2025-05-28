@@ -159,7 +159,7 @@ static void grouping() {
 static void number() {
   std::string lexeme(parser.previous.start, parser.previous.length);
   double value = std::strtod(lexeme.c_str(), nullptr);
-  emitConstant(value);
+  emitConstant(NUMBER_VAL(value));
 }
 
 static void unary() {

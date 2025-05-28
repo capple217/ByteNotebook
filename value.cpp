@@ -15,5 +15,5 @@ void ValueArray::freeValueArray() {
 }
 
 void printValue(Value value) {
-  std::cout << value;
+  std::cout << AS_NUMBER(value);
 }

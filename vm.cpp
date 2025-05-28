@@ -13,6 +13,10 @@ static void resetStack() {
   vm.stack.clear();
 }
 
+static void runtimeError(const std::string& format) { // FINISH UP NOT DONE AT ALL {18.3.1}
+
+}
+
 void initVM() {
   resetStack();
 
@@ -30,6 +34,10 @@ Value pop() {
   Value val = vm.stack.back();
   vm.stack.pop_back();
   return val;
+}
+
+static Value peek(int distance) {
+  return vm.stack[vm.stack.size() - 1 - distance];
 }
 
 static InterpretResult run() {                    // Main function the VM will be running the whole time; endless loop till termination (oxymoronic)
@@ -81,7 +89,11 @@ static InterpretResult run() {                    // Main function the VM will b
         break;
 
       case OP_NEGATE:
-        push(-pop());
+        if (!IS_NUMBER(peek(0))) {
+          runtimeError("Operand must be a number");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        push(NUMBER_VAL(-AS_NUMBER(pop())));
         break;
 
       case OP_RETURN: {
