@@ -39,6 +39,7 @@ struct ValueArray {                 // Same shtick as chunk, we use vectors inst
 
 };
 
+  bool valuesEqual(Value a, Value b);
   void printValue(Value value);
 
 #endif

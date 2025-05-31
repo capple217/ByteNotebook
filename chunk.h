@@ -11,10 +11,14 @@ enum OpCode {
   OP_NIL,
   OP_TRUE,
   OP_FALSE,
+  OP_EQUAL,
+  OP_GREATER,
+  OP_LESS,
   OP_ADD,
   OP_SUBTRACT,
   OP_MULTIPLY,
   OP_DIVIDE,
+  OP_NOT,
   OP_NEGATE,
   OP_CONSTANT_LONG,                       // Challenge code from Chapter 14 
   OP_RETURN,        // Return from current function
