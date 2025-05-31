@@ -15,5 +15,17 @@ void ValueArray::freeValueArray() {
 }
 
 void printValue(Value value) {
-  std::cout << AS_NUMBER(value);
+  switch (value.type) {
+    case VAL_BOOL:
+      std::cout << (value.as.boolean ? "true" : "false");
+      break;
+
+    case VAL_NIL:
+      std::cout << "nil";
+      break;
+
+    case VAL_NUMBER:
+      std::cout << value.as.number;
+      break;
+  }
 }
