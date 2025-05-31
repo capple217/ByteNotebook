@@ -7,7 +7,6 @@ TARGET = ByteNotebook
 
 # Source files
 SRCS = main.cpp chunk.cpp debug.cpp value.cpp vm.cpp compiler.cpp scanner.cpp
-static_cast<int>(message.length());
 # Object files 
 OBJS = $(SRCS:.cpp=.o)
 

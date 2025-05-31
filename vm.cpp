@@ -6,6 +6,9 @@
 
 #include <iostream>
 #include <vector>
+#include <format>
+#include <string>
+#include <cstdarg>
 
 VM vm;
 
@@ -13,8 +16,14 @@ static void resetStack() {
   vm.stack.clear();
 }
 
-static void runtimeError(const std::string& format) { // FINISH UP NOT DONE AT ALL {18.3.1}
+static void runtimeError(const std::string& format) { // MIGHT have to revisit to ensure all working parts 
 
+  std::cerr << format << "\n";
+
+  size_t instruction = static_cast<size_t>(std::distance(vm.chunk->code.data(), vm.ip)) - 1;
+  int line = vm.chunk->lines[instruction];
+  std::cerr << "[line " << line << "] in script\n";
+  resetStack();
 }
 
 void initVM() {
@@ -43,11 +52,15 @@ static Value peek(int distance) {
 static InterpretResult run() {                    // Main function the VM will be running the whole time; endless loop till termination (oxymoronic)
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
-#define BINARY_OP(op) \
-  do {  \
-    double b = pop(); \
-    double a = pop(); \
-    push(a op b); \
+#define BINARY_OP(valueType, op) \
+  do { \
+    if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
+      runtimeError("Operands must be numbers."); \
+      return INTERPRET_RUNTIME_ERROR; \
+    } \
+    double b = AS_NUMBER(pop()); \
+    double a = AS_NUMBER(pop()); \
+    push(valueType(a op b)); \
   } while (false);                          // Really cool use of macros, want to reuse another time
   
   while (true) {
@@ -73,19 +86,19 @@ static InterpretResult run() {                    // Main function the VM will b
       }
 
       case OP_ADD:
-        BINARY_OP(+);
+        BINARY_OP(NUMBER_VAL, +);
         break;
 
       case OP_SUBTRACT:
-        BINARY_OP(-);
+        BINARY_OP(NUMBER_VAL, -);
         break;
 
       case OP_MULTIPLY:
-        BINARY_OP(*);
+        BINARY_OP(NUMBER_VAL, *);
         break;
 
       case OP_DIVIDE:
-        BINARY_OP(/);
+        BINARY_OP(NUMBER_VAL, /);
         break;
 
       case OP_NEGATE:
