@@ -1,7 +1,9 @@
 #include "value.h"
 
 #include <vector>
+#include <string>
 #include <cstdlib>
+#include <object.h>
 #include <iostream>
 
 ValueArray::ValueArray() {}   // Default
@@ -27,6 +29,8 @@ void printValue(Value value) {
     case VAL_NUMBER:
       std::cout << value.as.number;
       break;
+
+    case VAL_OBJ: printObject(value); break;
   }
 }
 
@@ -36,6 +40,11 @@ bool valuesEqual(Value a, Value b) {
     case VAL_BOOL:      return AS_BOOL(a) == AS_BOOL(b);
     case VAL_NIL:       return true;
     case VAL_NUMBER:    return AS_NUMBER(a) == AS_NUMBER(b);
+    case VAL_OBJ: {
+      auto* aStr = AS_STRING(a);
+      auto* bStr = AS_STRING(b);
+      return (aStr->chars == bStr->chars);
+                  }
     default:            return false;                     // unreachable
   }
   
