@@ -1,13 +1,13 @@
 #ifndef object_h
 #define object_h
 
-#include "common.h"
 #include "value.h"
+#include "common.h"
 #include "memory.h"
 
 #include <vector>
+#include <string>
 
-struct Value;
 
 #define OBJ_TYPE(value)   (AS_OBJ(value)->type)
 #define IS_STRING(value)  isObjType(value, OBJ_STRING)
@@ -38,6 +38,9 @@ ObjString* takeString(std::string&& chars, int length);
 ObjString* copyString(const char* chars, int length); 
 void printObject(Value value);
 
-static inline bool isObjType(Value& value, ObjType type);
+static inline bool isObjType(const Value& value, ObjType type) {  // macro issues bc of include file issues for value
+  return value.type == VAL_OBJ
+      && static_cast<Obj*>(value.as.obj)->type == type;
+}
 
 #endif

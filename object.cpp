@@ -1,6 +1,7 @@
 #include "object.h"
 #include "value.h"
 #include "vm.h"
+#include "memory.h"
 
 #include <vector>
 #include <cstdio>
@@ -41,14 +42,11 @@ ObjString* copyString(const char* chars, int length) {
 void printObject(Value value) {
   switch (OBJ_TYPE(value)) {
     case OBJ_STRING: {
-      cosnt char* s = AS_CSTRING(value);
+      const char* s = AS_CSTRING(value);
       std::cout << s;
       break;
     }
   }
 }
 
-static inline bool isObjType(Value& value, ObjType type) {
-  return IS_OBJ(value) && AS_OBJ(value)->type == type;
-}
 

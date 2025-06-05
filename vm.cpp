@@ -59,11 +59,11 @@ static void concatenate() {     // Have to recheck heap alloc w this
   ObjString* a = AS_STRING(pop());
 
   std::string combo;
-  combo.reserve(a->chars.size() + b.chars.size());
+  combo.reserve(a->chars.size() + b->chars.size());
   combo.append(a->chars.data(), a->chars.size());
   combo.append(b->chars.data(), b->chars.size());
 
-  ObjString* result = takeString(std::move(combo), static_case<int>(combo.size()));
+  ObjString* result = takeString(std::move(combo), static_cast<int>(combo.size()));
   
   return push(OBJ_VAL(result));
 }

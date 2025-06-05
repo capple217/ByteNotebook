@@ -1,14 +1,13 @@
 #ifndef vm_h
 #define vm_h
 
-#include "chunk.h"
-#include "value.h"
-#include "object.h"
 #include "memory.h"
 
-#include <vector>
+struct Chunk;  
+struct Value;
+struct Obj; 
 
-struct Chunk;
+#include <vector>
 
 struct VM {
   Chunk* chunk;                                 // We use pointers here since we're pointing at the data within the VM to the object that has our vector
