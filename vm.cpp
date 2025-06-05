@@ -1,4 +1,5 @@
 #include "vm.h"
+#include "chunk.h"
 #include "common.h"
 #include "value.h"
 #include "debug.h"
@@ -28,11 +29,11 @@ static void runtimeError(const std::string& format) { // MIGHT have to revisit t
 
 void initVM() {
   resetStack();
-
+  vm.objects = nullptr;
 }
 
 void freeVM() {
-
+  freeObjects();
 }
 
 void push(Value value) {
@@ -51,6 +52,20 @@ static Value peek(int distance) {
 
 static bool isFalsey(Value value) {
   return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+}
+
+static void concatenate() {     // Have to recheck heap alloc w this
+  ObjString* b = AS_STRING(pop());
+  ObjString* a = AS_STRING(pop());
+
+  std::string combo;
+  combo.reserve(a->chars.size() + b.chars.size());
+  combo.append(a->chars.data(), a->chars.size());
+  combo.append(b->chars.data(), b->chars.size());
+
+  ObjString* result = takeString(std::move(combo), static_case<int>(combo.size()));
+  
+  return push(OBJ_VAL(result));
 }
 
 static InterpretResult run() {                    // Main function the VM will be running the whole time; endless loop till termination (oxymoronic)
@@ -103,8 +118,20 @@ static InterpretResult run() {                    // Main function the VM will b
       case OP_GREATER:  BINARY_OP(BOOL_VAL, >); break;
       case OP_LESS:     BINARY_OP(BOOL_VAL, <); break;
 
-      case OP_ADD:
-        BINARY_OP(NUMBER_VAL, +);
+      case OP_ADD: {
+          if (IS_STRING(peek(0)) && IS_NUMBER(peek(1))) {
+            concatenate();
+          }
+          else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1))) {
+            double b = AS_NUMBER(pop());
+            double a = AS_NUMBER(pop());
+            push(NUMBER_VAL(a + b));
+          }
+          else {
+            runtimeError("Operands must be two numbers or two strings");
+            return INTERPRET_RUNTIME_ERROR;
+          }
+        }
         break;
 
       case OP_SUBTRACT:

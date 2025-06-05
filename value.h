@@ -2,11 +2,13 @@
 #define value_h
 
 #include "common.h"
+#include "memory.h"
+#include "object.h"
 
 #include <vector>
 
-struct Obj Obj;
-struct ObjString ObjString;
+struct Obj;
+struct ObjString;
 
 enum ValueType {
   VAL_BOOL,

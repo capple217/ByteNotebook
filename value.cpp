@@ -1,9 +1,9 @@
+#include "object.h"
 #include "value.h"
 
 #include <vector>
 #include <string>
 #include <cstdlib>
-#include <object.h>
 #include <iostream>
 
 ValueArray::ValueArray() {}   // Default
