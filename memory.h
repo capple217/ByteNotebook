@@ -1,9 +1,9 @@
 #ifndef memory_h
 #define memory_h
 
-#include "vm.h"
-#include "object.h"
-#include "common.h"
+#include <cstddef>
+
+void* reallocate(void* pointer, std::size_t oldSize, std::size_t newSize);
 
 void freeObjects();
 

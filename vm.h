@@ -2,12 +2,11 @@
 #define vm_h
 
 #include "memory.h"
-
-struct Chunk;  
-struct Value;
-struct Obj; 
+#include "value.h"
+#include "chunk.h"
 
 #include <vector>
+#include <string>
 
 struct VM {
   Chunk* chunk;                                 // We use pointers here since we're pointing at the data within the VM to the object that has our vector

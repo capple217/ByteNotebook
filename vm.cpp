@@ -4,6 +4,8 @@
 #include "value.h"
 #include "debug.h"
 #include "compiler.h"
+#include "object.h"
+#include "memory.h"
 
 #include <iostream>
 #include <vector>
