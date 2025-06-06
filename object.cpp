@@ -39,11 +39,11 @@ ObjString* copyString(const char* chars, int length) {
   return allocateString(std::move(heapChars), length);
 }
 
-void printObject(Value value) {
+void printObject(Value value) {   // Changed from cstring to string
   switch (OBJ_TYPE(value)) {
     case OBJ_STRING: {
-      const char* s = AS_CSTRING(value);
-      std::cout << s;
+      auto* s = AS_STRING(value);
+      std::cout.write(s->chars.data(), s->length);
       break;
     }
   }
