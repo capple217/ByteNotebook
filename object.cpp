@@ -24,6 +24,7 @@ ObjString* allocateString(std::vector<char>&& chars, int length) {
   ObjString* string = new ObjString;
   string->length = length;
   string->chars = std::move(chars);
+  return string;
 }
 
 ObjString* takeString(std::string&& chars, int length) {    // need to manually create vector to move into allocateString
