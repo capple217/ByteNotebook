@@ -135,6 +135,17 @@ static InterpretResult run() {                    // Main function the VM will b
         break;
       }
 
+      case OP_SET_GLOBAL: {
+        ObjString* name = READ_STRING();
+        if (globals.set(name, peek(0))) {
+          globals.remove(name);
+          std::string varName{name->chars.data(), name->length};
+          std::string msg = "Undefined variable '" + varName + "'.";
+          runtimeError(msg);
+        }
+        break;
+      }
+
       case OP_EQUAL: {
           Value b = pop();
           Value a = pop();
