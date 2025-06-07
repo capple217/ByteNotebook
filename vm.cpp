@@ -35,6 +35,7 @@ void initVM() {
 }
 
 void freeVM() {
+  vm.strings.clear();
   freeObjects();
 }
 

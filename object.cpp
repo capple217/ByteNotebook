@@ -1,11 +1,13 @@
 #include "object.h"
 #include "vm.h"
 #include "memory.h"
+#include "table.h"
 
 #include <vector>
 #include <cstdio>
 #include <string>
 #include <iostream>
+#include <string_view>
 
 static Obj* allocateObject(size_t size, ObjType type) {
   // Allocate raw memory via our custom allocator
@@ -28,15 +30,33 @@ ObjString* allocateString(std::vector<char>&& chars, int length) {
 }
 
 ObjString* takeString(std::string&& chars, int length) {    // need to manually create vector to move into allocateString
+  std::string_view key{str.data(), size_t(length)};
+  auto it = vm.strings.entries.find(chars);
+  if (it != vm.strings.entries.end()) return it->second;            // Map already contains this key
+  
+  // Not found already so take ownership of bytes
   std::vector<char> buf(chars.data(), chars.data() + length);
   buf.push_back('\0');
-  return allocateString(std::move(buf), length);
+  auto stringObj =  allocateString(std::move(buf), length);
+  
+  vm.strings.entries.emplace(stringObj, OBJ_VAL(stringObj));
+
+  return stringObj;
 }
 
 ObjString* copyString(const char* chars, int length) {
+  std::string_view key{chars, size_t(length)};
+  // Check if the string is unique
+  
+  auto it = vm.strings.entries.find(key);
+  if (it != vm.strings.entries.end()) return it->second;        // key already exits in the map
+
   std::vector<char> heapChars(chars, chars + length);
   heapChars.push_back('\0');
-  return allocateString(std::move(heapChars), length);
+  auto stringObj =  allocateString(std::move(heapChars), length);
+  
+  vm.strings.entries.emplace(stringObj, OBJ_VAL(stringObj));
+  return stringObj;
 }
 
 void printObject(Value value) {   // Changed from cstring to string
