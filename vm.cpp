@@ -35,6 +35,7 @@ void initVM() {
 }
 
 void freeVM() {
+  vm.globals.clear();
   vm.strings.clear();
   freeObjects();
 }
@@ -74,6 +75,7 @@ static void concatenate() {     // Have to recheck heap alloc w this
 static InterpretResult run() {                    // Main function the VM will be running the whole time; endless loop till termination (oxymoronic)
 #define READ_BYTE() (*vm.ip++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+#define READ_STRING() AS_STRING(READ_CONSTANT())
 #define BINARY_OP(valueType, op) \
   do { \
     if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
@@ -110,6 +112,28 @@ static InterpretResult run() {                    // Main function the VM will b
       case OP_NIL:    push(NIL_VAL); break;
       case OP_TRUE:   push(BOOL_VAL(true)); break;
       case OP_FALSE:  push(BOOL_VAL(false)); break;
+
+      case OP_POP:    pop(); break;
+
+      case OP_GET_GLOBAL: {
+        ObjString* name = READ_STRING();
+        Value value;
+        if (!vm.globals.get(name, &value)) {
+          std::string varName{name->chars.data(), name->length};
+          std::string msg = "Undefined variable '" + varName + "'.";
+          runtimeError(msg);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        push(value);
+        break;
+      }
+
+      case OP_DEFINE_GLOBAL: {
+        ObjString* name = READ_STRING();
+        globals.set(name, peek(0));
+        pop();
+        break;
+      }
 
       case OP_EQUAL: {
           Value b = pop();
@@ -176,6 +200,7 @@ static InterpretResult run() {                    // Main function the VM will b
 
 #undef READ_BYTE
 #undef READ_CONSTANT
+#undef READ_STRING
 #undef BINARY_OP
 }
 

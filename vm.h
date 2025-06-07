@@ -15,6 +15,7 @@ struct VM {
   uint8_t* ip;
   std::vector<Value> stack;
   Obj* objects;
+  Table globals;
   Table strings;
 };
 
