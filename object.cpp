@@ -30,9 +30,9 @@ ObjString* allocateString(std::vector<char>&& chars, int length) {
 }
 
 ObjString* takeString(std::string&& chars, int length) {    // need to manually create vector to move into allocateString
-  std::string_view key{str.data(), size_t(length)};
+  std::string_view key{chars.data(), size_t(length)};
   auto it = vm.strings.entries.find(chars);
-  if (it != vm.strings.entries.end()) return it->second;            // Map already contains this key
+  if (it != vm.strings.entries.end()) return it->first;            // Map already contains this key
   
   // Not found already so take ownership of bytes
   std::vector<char> buf(chars.data(), chars.data() + length);
@@ -45,11 +45,11 @@ ObjString* takeString(std::string&& chars, int length) {    // need to manually 
 }
 
 ObjString* copyString(const char* chars, int length) {
-  std::string_view key{chars, size_t(length)};
+  std::string_view key{chars, static_cast<size_t>(length)};
   // Check if the string is unique
   
   auto it = vm.strings.entries.find(key);
-  if (it != vm.strings.entries.end()) return it->second;        // key already exits in the map
+  if (it != vm.strings.entries.end()) return it->first;        // key already exits in the map
 
   std::vector<char> heapChars(chars, chars + length);
   heapChars.push_back('\0');

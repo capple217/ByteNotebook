@@ -3,11 +3,13 @@
 
 #include "common.h"
 #include "value.h"
+#include "object.h"
 
 #include <unordered_map>
 #include <string>
 #include <string_view>
 #include <cstring>
+#include <algorithm>
 
 // Deviating heavily from original C version thanks to unordered_map already existing
 
@@ -20,7 +22,7 @@ public:
 
         size_t operator()(ObjString* s) const noexcept {
           return std::hash<std::string_view>()(
-            std::string_view(s->chars.data(), s->length);
+            std::string_view(s->chars.data(), s->length)
           );
         }
 
@@ -44,11 +46,12 @@ public:
         }
 
         bool operator()(std::string_view sv, ObjString* b) const noexcept {
-          return opreator()(b, sv);
+          return operator()(b, sv);
         }
     };
 
     using MapType = std::unordered_map<ObjString*, Value, Hash, Eq>;
+    MapType entries;
 
     bool set(ObjString* key, Value value);
 
@@ -59,9 +62,6 @@ public:
     void clear();
 
     size_t size() const;
-
-private:
-    MapType entries;
 };
 
 #endif
