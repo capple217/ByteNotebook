@@ -98,6 +98,16 @@ static void consume(TokenType type, const std::string& message) {
   errorAtCurrent(message);
 }
 
+static bool check(TokenType type) {
+  return parser.current.type == type;
+}
+
+static bool match(TokenType type) {
+  if (!check(type)) return false;
+  advance();
+  return true;
+}
+
 static void emitByte(uint8_t byte) {
   (*currentChunk()).writeChunk(byte, parser.previous.line);             // Can maybe be rewritten as currentChunk()->writeChunk(...);
 }
@@ -264,6 +274,22 @@ static void expression() {
   parsePrecedence(PREC_ASSIGNMENT);
 }
 
+static void printStatement() {
+  expression();
+  consume(TOKEN_SEMICOLON, "Expect ';' after value.");
+  emitByte(OP_PRINT);
+}
+
+static void declaration() {
+  statement();
+}
+
+static void statement() {
+  if (match(TOKEN_PRINT)) {
+    printStatement();
+  }
+}
+
 bool compile(const std::string source, Chunk* chunk) {
   initScanner(source);
   compilingChunk = chunk;
@@ -272,8 +298,10 @@ bool compile(const std::string source, Chunk* chunk) {
   parser.panicMode = false;
 
   advance();
-  expression();
-  consume(TOKEN_EOF, "Expect end of expresssion.");
+
+  while (!match(TOKEN_EOF)) {
+    declaration();
+  }
 
   endCompiler();
   return !parser.hadError;
