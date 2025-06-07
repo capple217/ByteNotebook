@@ -193,7 +193,7 @@ static void string(bool canAssign) {
 }
 
 static void namedVariable(Token name, bool canAssign) {
-  uint8_t arg = identifierConstant(&name);
+  auto arg = identifierConstant(&name);
   if (canAssign && match(TOKEN_EQUAL)) {
     expression();
     emitBytes(OP_GET_GLOBAL, arg);

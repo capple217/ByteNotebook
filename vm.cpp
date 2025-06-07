@@ -118,8 +118,8 @@ static InterpretResult run() {                    // Main function the VM will b
       case OP_GET_GLOBAL: {
         ObjString* name = READ_STRING();
         Value value;
-        if (!vm.globals.get(name, &value)) {
-          std::string varName{name->chars.data(), name->length};
+        if (!vm.globals.get(name, value)) {
+          std::string varName{name->chars.data(), static_cast<size_t>(name->length)};
           std::string msg = "Undefined variable '" + varName + "'.";
           runtimeError(msg);
           return INTERPRET_RUNTIME_ERROR;
@@ -130,16 +130,16 @@ static InterpretResult run() {                    // Main function the VM will b
 
       case OP_DEFINE_GLOBAL: {
         ObjString* name = READ_STRING();
-        globals.set(name, peek(0));
+        vm.globals.set(name, peek(0));
         pop();
         break;
       }
 
       case OP_SET_GLOBAL: {
         ObjString* name = READ_STRING();
-        if (globals.set(name, peek(0))) {
-          globals.remove(name);
-          std::string varName{name->chars.data(), name->length};
+        if (vm.globals.set(name, peek(0))) {
+          vm.globals.remove(name);
+          std::string varName{name->chars.data(), static_cast<size_t>(name->length)};
           std::string msg = "Undefined variable '" + varName + "'.";
           runtimeError(msg);
         }

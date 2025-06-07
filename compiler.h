@@ -3,6 +3,7 @@
 
 #include "object.h"
 #include "vm.h"
+#include "scanner.h"
 
 #include <string>
 
@@ -12,5 +13,8 @@ static void expression();
 static void statement();
 static void declaration();
 // might have to add static ParseRule* getRule(TokenType type);
+
+
+static uint8_t identifierConstant(Token* name);
 
 #endif
