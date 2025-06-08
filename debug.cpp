@@ -19,8 +19,8 @@ static int simpleInstruction(const char* name, int offset) {
 
 }
 
-static int byteInstruction(const char* name, Chunk* chunk, int offset) {
-  uint8_t slot = chunk->code[offset + 1];
+static int byteInstruction(const char* name, Chunk& chunk, int offset) {
+  uint8_t slot = chunk.code[offset + 1];
   std::cout
       << std::left  << std::setw(16) << name
       << std::right << std::setw(4)  << static_cast<int>(slot)

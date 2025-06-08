@@ -169,7 +169,7 @@ static void endScope() {
 
   while (!(current->locals.empty()) && current->locals.back().depth > current->scopeDepth) {
     emitByte(OP_POP);
-    current.locals.pop_back();
+    current->locals.pop_back();
   }
 }
 
@@ -221,16 +221,19 @@ static void string(bool canAssign) {
   emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.length - 2)));
 }
 
+static int resolveLocal(Compiler* compiler, Token* name);
+
 static void namedVariable(Token name, bool canAssign) {
   uint8_t getOp, setOp;
   auto arg = resolveLocal(current, &name);
   if (arg != -1) {
     getOp = OP_GET_LOCAL;
-    setOp = OP_SET_GLOBAL;
+    setOp = OP_SET_LOCAL;
   }
   else {
-    getOP = OP_GET_GLOBAL;
-    setOp - OP_SET_GLOBAL;
+    arg = identifierConstant(&name);
+    getOp = OP_GET_GLOBAL;
+    setOp = OP_SET_GLOBAL;
   }
 
   if (canAssign && match(TOKEN_EQUAL)) {
@@ -331,11 +334,11 @@ static uint8_t identifierConstant(Token* name) {
 
 static bool identifiersEqual(Token* a, Token* b) {
   if (a->length != b->length) return false;
-  return std::equal(a.start, a.start + a.length, b.start);
+  return std::equal(a->start, a->start + a->length, b->start);
 }
 
 static int resolveLocal(Compiler* compiler, Token* name) {
-  for (auto i = compiler.locals.size() - 1; i >= 0; ++i) {
+  for (auto i = compiler->locals.size() - 1; i >= 0; ++i) {
   Local* local = &compiler->locals[i];
   if (identifiersEqual(name, &local->name)) {
     if (local->depth == -1) {
@@ -353,9 +356,9 @@ static void addLocal(Token name) {
 }
 
 static void declareVariable() {
-  if (current->scopeDepth == 0) return 0;
+  if (current->scopeDepth == 0) return;
 
-  Token* name = parser.previous;
+  Token* name = &parser.previous;
   for (auto i = current->locals.size() - 1; i >= 0; i--) {
     Local* local = &current->locals[i];
     if (local->depth != -1 && local->depth < current->scopeDepth) break;

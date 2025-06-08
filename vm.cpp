@@ -149,12 +149,14 @@ static InterpretResult run() {                    // Main function the VM will b
 
       case OP_SET_GLOBAL: {
         ObjString* name = READ_STRING();
-        if (vm.globals.set(name, peek(0))) {
-          vm.globals.remove(name);
+        Value val = peek(0);
+        Value unused;
+        if (!vm.globals.get(name, unused)) {
           std::string varName{name->chars.data(), static_cast<size_t>(name->length)};
           std::string msg = "Undefined variable '" + varName + "'.";
           runtimeError(msg);
         }
+        vm.globals.set(name, val);
         break;
       }
 
