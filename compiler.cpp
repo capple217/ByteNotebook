@@ -44,7 +44,18 @@ struct ParseRule {
   Precedence precedence;
 };
 
+struct Local {
+  Token name;
+  int depth;
+};
+
+struct Compiler {
+  std::vector<Local> locals;
+  int scopeDepth;
+};
+
 Parser parser;
+Compiler* current = nullptr;
 Chunk* compilingChunk;
 
 static Chunk* currentChunk() {
@@ -63,7 +74,7 @@ static void errorAt(Token* token, const std::string& message) {
     // nothing
   }
   else {
-    std::cerr << " at '" << std::string(token->start, token->length) << "'";
+   std::cerr << " at '" << std::string(token->start, token->length) << "'";
   }
 
   std::cerr << ": " << message << std::endl;
@@ -135,6 +146,11 @@ static void emitConstant(Value value) {
   emitBytes(OP_CONSTANT, makeConstant(value));
 }
 
+static void initCompiler(Compiler* compiler) {
+  compiler->scopeDepth = 0;
+  current = compiler;
+}
+
 static void endCompiler() {
   emitReturn();
 #ifdef DEBUG_PRINT_CODE
@@ -142,6 +158,19 @@ static void endCompiler() {
     disassembleChunk(*currentChunk(), "code");
   }
 #endif
+}
+
+static void beginScope() {
+  current->scopeDepth++;
+}
+
+static void endScope() {
+  current->scopeDepth--;
+
+  while (!(current->locals.empty()) && current->locals.back().depth > current->scopeDepth) {
+    emitByte(OP_POP);
+    current.locals.pop_back();
+  }
 }
 
 static void expression();
@@ -193,13 +222,23 @@ static void string(bool canAssign) {
 }
 
 static void namedVariable(Token name, bool canAssign) {
-  auto arg = identifierConstant(&name);
-  if (canAssign && match(TOKEN_EQUAL)) {
-    expression();
-    emitBytes(OP_GET_GLOBAL, arg);
+  uint8_t getOp, setOp;
+  auto arg = resolveLocal(current, &name);
+  if (arg != -1) {
+    getOp = OP_GET_LOCAL;
+    setOp = OP_SET_GLOBAL;
   }
   else {
-    emitBytes(OP_GET_GLOBAL, arg);
+    getOP = OP_GET_GLOBAL;
+    setOp - OP_SET_GLOBAL;
+  }
+
+  if (canAssign && match(TOKEN_EQUAL)) {
+    expression();
+    emitBytes(setOp, static_cast<uint8_t>(arg));
+  }
+  else {
+    emitBytes(getOp, static_cast<uint8_t>(arg));
   }
 }
 
@@ -290,12 +329,64 @@ static uint8_t identifierConstant(Token* name) {
   return makeConstant(OBJ_VAL(copyString(name->start, name->length)));
 }
 
+static bool identifiersEqual(Token* a, Token* b) {
+  if (a->length != b->length) return false;
+  return std::equal(a.start, a.start + a.length, b.start);
+}
+
+static int resolveLocal(Compiler* compiler, Token* name) {
+  for (auto i = compiler.locals.size() - 1; i >= 0; ++i) {
+  Local* local = &compiler->locals[i];
+  if (identifiersEqual(name, &local->name)) {
+    if (local->depth == -1) {
+      error("Can't read local variable in its own intializer");
+    }
+    return i;
+    }
+  }
+
+  return -1;
+}
+
+static void addLocal(Token name) {
+  current->locals.emplace_back(name, -1);
+}
+
+static void declareVariable() {
+  if (current->scopeDepth == 0) return 0;
+
+  Token* name = parser.previous;
+  for (auto i = current->locals.size() - 1; i >= 0; i--) {
+    Local* local = &current->locals[i];
+    if (local->depth != -1 && local->depth < current->scopeDepth) break;
+
+    if (identifiersEqual(name, &local->name)) {
+      error("Already a variable with this name in this scope.");
+    }
+
+  }
+  addLocal(*name);
+}
+
 static uint8_t parseVariable(const char* errorMessage) {
   consume(TOKEN_IDENTIFIER, errorMessage);
+
+  declareVariable();
+  if (current->scopeDepth > 0) return 0;
+
   return identifierConstant(&parser.previous);
 }
 
+static void markInitialized() {
+  current->locals.back().depth = current->scopeDepth;
+}
+
 static void defineVariable(uint8_t global) {
+  if (current->scopeDepth > 0) {
+    markInitialized();
+    return;
+  }
+
   emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
@@ -305,6 +396,14 @@ static ParseRule* getRule(TokenType type) {
 
 static void expression() {
   parsePrecedence(PREC_ASSIGNMENT);
+}
+
+static void block() {
+  while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
+    declaration();
+  }
+
+  consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
 
 static void varDeclaration() {
@@ -374,6 +473,11 @@ static void statement() {
   if (match(TOKEN_PRINT)) {
     printStatement();
   }
+  else if (match(TOKEN_LEFT_BRACE)) {
+    beginScope();
+    block();
+    endScope();
+  }
   else {
     expressionStatement();
   }
@@ -381,6 +485,8 @@ static void statement() {
 
 bool compile(const std::string source, Chunk* chunk) {
   initScanner(source);
+  Compiler compiler;
+  initCompiler(&compiler);
   compilingChunk = chunk;
 
   parser.hadError = false;
